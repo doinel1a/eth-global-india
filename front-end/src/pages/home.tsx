@@ -3,7 +3,7 @@ import type { Reducer } from 'react';
 import React, { useEffect, useReducer } from 'react';
 
 import ChainSelectorSection from '@/components/sections/chain-selector';
-import TemplateSelector from '@/components/sections/template-selector';
+import SmartContractCustomisationSection from '@/components/sections/smart-contract-customisation';
 import EReducerState from '@/constants/reducer-state';
 import IChainData from '@/interfaces/chain-data';
 import { chainsDataInitialState, chainsDataReducer, IAction, TState } from '@/reducers/chains-data';
@@ -50,7 +50,7 @@ export default function HomePage() {
   return (
     <div className='flex w-full max-w-[1200px] flex-col gap-y-6'>
       <ChainSelectorSection isChainsDataLoading={state.isLoading} chainsData={state.chainsData} />
-      <TemplateSelector chainsData={state.chainsData} />
+      <SmartContractCustomisationSection chainsData={state.chainsData} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Textarea } from '../ui/textarea';
 import SectionContainer from './container';
 
-interface ITemplateSelectorSection {
+interface ISmartContractCustomisationSection {
   chainsData: IChainData[] | undefined;
 }
 
@@ -40,7 +40,9 @@ function isSCFeatureKey(scTemplate: string): scTemplate is SCFeatureKey {
   return ['Token', 'NFT', 'Staking', 'Farm', 'Marketplace', 'Launchpad'].includes(scTemplate);
 }
 
-export default function TemplateSelectorSection({ chainsData }: ITemplateSelectorSection) {
+export default function SmartContractCustomisationSection({
+  chainsData
+}: ISmartContractCustomisationSection) {
   const selectedChain = useSelectedChainStore((store) => store.selectedChain);
 
   const [selectedSCTemplate, setSelectedSCTemplate] = useState<SCFeatureKey>('Token');
