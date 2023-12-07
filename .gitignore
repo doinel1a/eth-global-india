@@ -1,21 +1,14 @@
 # dependencies
-/node_modules
+**/node_modules
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
 /.pnp
 .pnp.js
 
-# testing
-/coverage
-/test-results/
-/playwright-report/
-/playwright/.cache/
-
 # production
-/dist
-/dist-ssr
-
-# various
-/playwright-report
-TODO.md
+front-end/dist
+front-end/src/sdk
 
 # misc
 .DS_Store
@@ -27,8 +20,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+
 # local env files
-.env*.local
+**/.env
 
 # editor directories and files
 .vscode/*
