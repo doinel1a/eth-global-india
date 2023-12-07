@@ -11,5 +11,10 @@ export default defineConfig({
     partytownVite({
       dest: path.join(__dirname, 'dist', '~partytown')
     })
-  ]
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });
