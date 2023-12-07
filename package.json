@@ -1,0 +1,22 @@
+{
+	"private": true,
+	"author": {
+		"name": "Doinel Atanasiu",
+		"email": "doinel1atanasiu@gmail.com",
+		"url": "https://business-link.d1a.app"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/doinel1a/vite-react-ts-starter"
+	},
+	"type": "module",
+	"license": "MIT",
+	"scripts": {
+		"postinstall": "npx husky install"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^18.4.3",
+		"@commitlint/config-conventional": "^18.4.3",
+		"husky": "^8.0.3"
+	}
+}

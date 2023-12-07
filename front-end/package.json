@@ -12,7 +12,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "postinstall": "npx husky install && npx playwright install",
+    "postinstall": "npx playwright install",
     "clean:dist": "npx rimraf dist",
     "clean:report": "npx rimraf playwright-report",
     "test:chrome": "npx playwright test --headed --project=chromium",
@@ -44,8 +44,6 @@
   },
   "devDependencies": {
     "@builder.io/partytown": "^0.8.1",
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
     "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
     "@playwright/test": "^1.40.1",
     "@types/node": "^20.10.4",
@@ -67,7 +65,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-sonarjs": "^0.23.0",
     "eslint-plugin-unicorn": "^49.0.0",
-    "husky": "^8.0.3",
     "postcss": "^8.4.32",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.9",
