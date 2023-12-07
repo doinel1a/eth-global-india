@@ -11,6 +11,7 @@
 
 # production
 /dist
+/src/sdk
 
 # misc
 .DS_Store
