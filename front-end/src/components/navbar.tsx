@@ -23,7 +23,7 @@ const menuItems = [
 
 export default function Navbar() {
   return (
-    <header className='border-border bg-background fixed z-10 flex w-full items-center justify-center border-b backdrop-blur-lg'>
+    <header className='fixed z-10 flex w-full items-center justify-center border-b border-border bg-background backdrop-blur-lg'>
       <nav className='flex w-full max-w-[1320px] items-center justify-between p-5'>
         <img src={defiBuilderLogo} alt="DeFi Builder's logo" className='h-6' />
 
