@@ -50,7 +50,7 @@ export default function HomePage() {
   return (
     <div className='flex w-full max-w-[1200px] flex-col gap-y-6'>
       <ChainSelectorSection isChainsDataLoading={state.isLoading} chainsData={state.chainsData} />
-      <TemplateSelector />
+      <TemplateSelector chainsData={state.chainsData} />
     </div>
   );
 }
