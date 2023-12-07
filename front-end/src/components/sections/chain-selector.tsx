@@ -31,7 +31,7 @@ export default function ChainSelectorSection({
 
   return (
     <SectionContainer
-      className='flex items-center justify-between bg-background px-10 py-12 backdrop-blur-lg'
+      className='flex items-center justify-between px-10 py-12 backdrop-blur-md'
       style={{
         background: `url(${stepBackground}) no-repeat`
       }}
