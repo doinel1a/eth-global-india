@@ -14,6 +14,12 @@ export type BuildResponse = {
 	message: string;
 };
 
+export type BuildResponseWithCode = {
+	success: boolean;
+	message: string;
+	code: string;
+};
+
 export class LlmService {
 	constructor() {
 		this.#connect();
@@ -111,12 +117,12 @@ export class LlmService {
 		chain: 'fuel' | 'multiversx' | 'solidity',
 		smartContractCode: string,
 		maxTries = 3
-	): Promise<BuildResponse> {
+	): Promise<BuildResponseWithCode> {
 		console.log('FEEDBACK - ATTEMPT', maxTries);
 
 		const buildResponse = await this.buildCode(chain, smartContractCode);
 
-		if (maxTries === 0 || buildResponse.success) return buildResponse;
+		if (maxTries === 0 || buildResponse.success) return {...buildResponse, code: smartContractCode};
 		else {
 			const newSmartContractCode = await this.callBuildResolverLLM(
 				smartContractCode,
