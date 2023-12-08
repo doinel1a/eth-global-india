@@ -31,6 +31,7 @@ export default function Navbar() {
           {menuItems.map((item) => (
             <Button
               key={item.name.toLowerCase()}
+              tabIndex={-1}
               variant='outline'
               title='Coming soon. . .'
               className='cursor-wait text-[#4F4F4F] hover:text-[#4F4F4F]'
