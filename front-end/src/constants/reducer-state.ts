@@ -1,7 +1,8 @@
 enum EReducerState {
   start = 'START',
   success = 'SUCCESS',
-  error = 'ERROR'
+  error = 'ERROR',
+  reset = 'RESET'
 }
 
 export default EReducerState;
