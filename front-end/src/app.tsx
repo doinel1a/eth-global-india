@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import mainBG from '@/assets/images/main-bg.svg';
+import { Toaster } from '@/components/ui/toaster';
 
 import Footer from './components/footer';
 import Navbar from './components/navbar';
@@ -30,6 +31,8 @@ function App() {
         </main>
 
         <Footer />
+
+        <Toaster />
       </ThemeProvider>
     </BrowserRouter>
   );
