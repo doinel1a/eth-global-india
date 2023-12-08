@@ -19,12 +19,12 @@ export default function HomePage() {
     async function getAllChainsData() {
       dispatch({ state: EReducerState.start, payload: [] });
 
-      const mappedChainsData: IChainData[] = [];
-
       try {
         const chainsDataResponse = await LlmService.getAllChains();
 
         if (chainsDataResponse && Array.isArray(chainsDataResponse)) {
+          const mappedChainsData: IChainData[] = [];
+
           for (const data of chainsDataResponse) {
             const mappedChainData = mapDataResponseToChain(data);
 
@@ -32,6 +32,8 @@ export default function HomePage() {
               mappedChainsData.push(mappedChainData);
             }
           }
+
+          dispatch({ state: EReducerState.success, payload: mappedChainsData });
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -39,8 +41,6 @@ export default function HomePage() {
 
           console.error('ERROR GETTING ALL CHAINS DATA', error);
         }
-      } finally {
-        dispatch({ state: EReducerState.success, payload: mappedChainsData });
       }
     }
 
