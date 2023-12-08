@@ -3,6 +3,7 @@ import React, { useEffect, useReducer } from 'react';
 import type { Reducer } from 'react';
 
 import ChainSelectorSection from '@/components/sections/chain-selector';
+// import SmartContractCodeViewer from '@/components/sections/smart-contract-code-viewer';
 import SmartContractCustomisationsSection from '@/components/sections/smart-contract-customisations';
 import EReducerState from '@/constants/reducer-state';
 import IChainData from '@/interfaces/chain-data';
@@ -51,6 +52,7 @@ export default function HomePage() {
     <div className='flex w-full max-w-[1200px] flex-col gap-y-6'>
       <ChainSelectorSection isChainsDataLoading={state.isLoading} chainsData={state.chainsData} />
       <SmartContractCustomisationsSection chainsData={state.chainsData} />
+      {/* <SmartContractCodeViewer smartContractCode={smartContractCode} /> */}
     </div>
   );
 }
