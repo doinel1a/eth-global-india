@@ -134,7 +134,10 @@ export default function SmartContractCustomisationSection({
     try {
       dispatchCompileSCState({ state: EReducerState.start, payload: '' });
 
-      const response = await LlmService.buildCode('solidity', generateSCState.smartContract);
+      const response = await LlmService.buildCode(
+        mapChainToCompileEndpoint(selectedChain),
+        generateSCState.smartContract
+      );
 
       if (
         response &&
@@ -188,7 +191,7 @@ export default function SmartContractCustomisationSection({
       <div className='flex w-full items-center justify-between'>
         <Button
           disabled={generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading}
-          onClick={initSmartContractIter}
+          onClick={compileSmartContract}
         >
           {generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading
             ? 'Generating Smart Contract'
@@ -222,4 +225,24 @@ export default function SmartContractCustomisationSection({
       </div>
     </SectionContainer>
   );
+}
+
+function mapChainToCompileEndpoint(selectedChain: string) {
+  switch (selectedChain) {
+    case 'Aurora':
+    case 'Base':
+    case 'Ethereum':
+    case 'Zeta': {
+      return 'solidity';
+    }
+    case 'Sway': {
+      return 'fuel';
+    }
+    case 'Multiversx': {
+      return 'multiversx';
+    }
+    default: {
+      return '';
+    }
+  }
 }
