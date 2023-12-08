@@ -20,6 +20,7 @@ import type {
 import { Button } from '@/components/ui/button';
 import EReducerState from '@/constants/reducer-state';
 import IChainData from '@/interfaces/chain-data';
+import { mapChainToCompileEndpoint } from '@/lib/mappers';
 import { auditSCInitialState, auditSCReducer } from '@/reducers/audit-smart-contract';
 import { compileSCInitialState, compileSCReducer } from '@/reducers/compile-smart-contract';
 import {
@@ -267,25 +268,4 @@ export default function SmartContractCustomisationSection({
       </div>
     </SectionContainer>
   );
-}
-
-function mapChainToCompileEndpoint(selectedChain: string) {
-  switch (selectedChain) {
-    case 'Aurora':
-    case 'Base':
-    case 'Ethereum':
-    case 'Zeta': {
-      return 'solidity';
-    }
-    case 'Sway': {
-      return 'fuel';
-    }
-    // TODO: Fix MongoDB typo - Should be MultiversX
-    case 'Multiversx': {
-      return 'multiversx';
-    }
-    default: {
-      return '';
-    }
-  }
 }
