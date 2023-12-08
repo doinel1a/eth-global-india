@@ -1,6 +1,6 @@
-import type { Reducer } from 'react';
-
 import React, { useEffect, useReducer } from 'react';
+
+import type { Reducer } from 'react';
 
 import ChainSelectorSection from '@/components/sections/chain-selector';
 import SmartContractCustomisationsSection from '@/components/sections/smart-contract-customisations';
