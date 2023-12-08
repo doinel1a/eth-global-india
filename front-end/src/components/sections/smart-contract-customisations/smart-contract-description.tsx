@@ -20,7 +20,7 @@ export default function SmartContractDescription() {
       <Textarea
         value={scDescription}
         placeholder='Insert token name, supply and others customisations'
-        className='h-60 w-full resize-none rounded-3xl'
+        className='h-60 w-full resize-none rounded-3xl p-5'
         onChange={(event) => setSCDescription(event.target.value)}
       />
     </div>
