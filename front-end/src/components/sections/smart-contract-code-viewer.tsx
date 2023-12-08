@@ -3,6 +3,7 @@ import React from 'react';
 import { Copy, FileDown } from 'lucide-react';
 
 import { useToast } from '@/components/ui/use-toast';
+import { mapChainToFileExtension } from '@/lib/mappers';
 import useSelectedChainStore from '@/store/selected-chain';
 
 import { Button } from '../ui/button';
@@ -93,25 +94,4 @@ function downloadSmartContractCode(smartContractCode: string, fileName: string) 
 
 function copySmartContractCode(smartContractCode: string) {
   navigator.clipboard.writeText(smartContractCode);
-}
-
-function mapChainToFileExtension(selectedChain: string) {
-  switch (selectedChain) {
-    case 'Aurora':
-    case 'Base':
-    case 'Ethereum':
-    case 'Zeta': {
-      return 'sol';
-    }
-    case 'Sway': {
-      return 'sw';
-    }
-    // TODO: Fix MongoDB typo - Should be MultiversX
-    case 'Multiversx': {
-      return 'rs';
-    }
-    default: {
-      return '';
-    }
-  }
 }

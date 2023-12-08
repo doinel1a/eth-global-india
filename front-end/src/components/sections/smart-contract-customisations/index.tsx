@@ -1,35 +1,13 @@
-import React, { Reducer, useEffect, useReducer } from 'react';
-
-import type {
-  IAction as IAduitSCAction,
-  TState as IAuditSCState
-} from '@/reducers/audit-smart-contract';
-import type {
-  IAction as ICompileSCAction,
-  TState as TCompileSCState
-} from '@/reducers/compile-smart-contract';
-import type {
-  IAction as IFixAndCompileSCAction,
-  TState as TFixAndCompileSCState
-} from '@/reducers/fix-and-compile-smart-contract';
-import type {
-  IAction as IGenerateSCAction,
-  TState as TGenerateSCState
-} from '@/reducers/generate-smart-contract';
+import React, { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
-import EReducerState from '@/constants/reducer-state';
+import { useToast } from '@/components/ui/use-toast';
 import IChainData from '@/interfaces/chain-data';
-import { auditSCInitialState, auditSCReducer } from '@/reducers/audit-smart-contract';
-import { compileSCInitialState, compileSCReducer } from '@/reducers/compile-smart-contract';
-import {
-  fixAndCompileSCInitialState,
-  fixAndCompileSCReducer
-} from '@/reducers/fix-and-compile-smart-contract';
-import { generateSCInitialState, generateSCReducer } from '@/reducers/generate-smart-contract';
+import { mapChainToCompileEndpoint } from '@/lib/mappers';
 import { LlmService } from '@/sdk/llmService.sdk';
 import useSelectedChainStore from '@/store/selected-chain';
 import useSCCustomisationsStore from '@/store/smart-contract-customisations';
+import useSCIterStore from '@/store/smart-contract-iter';
 
 import SectionContainer from '../container';
 import GenerationStepsState from './generation-steps-status';
@@ -70,22 +48,17 @@ export default function SmartContractCustomisationSection({
   const selectedSCTemplate = useSCCustomisationsStore((store) => store.scCustomisations.template);
   const selectedSCFeatures = useSCCustomisationsStore((store) => store.scCustomisations.features);
 
-  const [generateSCState, dispatchGenerateSCState] = useReducer<
-    Reducer<TGenerateSCState, IGenerateSCAction>
-  >(generateSCReducer, generateSCInitialState);
+  const generateSC = useSCIterStore((store) => store.generateSC);
+  const compileSC = useSCIterStore((store) => store.compileSC);
+  const fixAndCompileSC = useSCIterStore((store) => store.fixAndCompileSC);
+  const auditSC = useSCIterStore((store) => store.auditSC);
 
-  const [compileSCState, dispatchCompileSCState] = useReducer<
-    Reducer<TCompileSCState, ICompileSCAction>
-  >(compileSCReducer, compileSCInitialState);
+  const setGenerateSC = useSCIterStore((store) => store.setGenerateSC);
+  const setCompileSC = useSCIterStore((store) => store.setCompileSC);
+  const setFixAndCompileSC = useSCIterStore((store) => store.setFixAndCompileSC);
+  const setAuditSC = useSCIterStore((store) => store.setAuditSC);
 
-  const [fixAndCompileSCState, dispatchFixAndCompileSCState] = useReducer<
-    Reducer<TFixAndCompileSCState, IFixAndCompileSCAction>
-  >(fixAndCompileSCReducer, fixAndCompileSCInitialState);
-
-  // prettier-ignore
-  const [auditSCState, dispatchAuditSCState] = useReducer<
-    Reducer<IAuditSCState, IAduitSCAction>
-  >(auditSCReducer, auditSCInitialState);
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log('selectedChain', selectedChain);
@@ -95,23 +68,54 @@ export default function SmartContractCustomisationSection({
     console.log('scCustomisations', scCustomisations);
   }, [scCustomisations]);
 
+  useEffect(() => {
+    console.log('GENERATE SC', generateSC);
+  }, [generateSC]);
+  useEffect(() => {
+    console.log('FIX AND COMPILE SC', fixAndCompileSC);
+  }, [fixAndCompileSC]);
+
   async function initSmartContractIter() {
-    dispatchGenerateSCState({ state: EReducerState.reset, payload: '' });
-    dispatchCompileSCState({ state: EReducerState.reset, payload: '' });
-    dispatchFixAndCompileSCState({ state: EReducerState.reset, payload: '' });
-    dispatchAuditSCState({ state: EReducerState.reset, payload: '' });
+    setGenerateSC({ isLoading: false, isSuccess: false, isError: false, smartContract: '' });
+    setCompileSC({ isLoading: false, isSuccess: false, isError: false, compilationOutput: '' });
+    setFixAndCompileSC({
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      fixedSmartContract: '',
+      compilationOutput: ''
+    });
+    setAuditSC({
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      auditingOutput: ''
+    });
 
     await generateSmartContract();
 
     await compileSmartContract();
 
-    console.log('compileSCState.isError', compileSCState.isError);
-    if (compileSCState.isError) {
+    console.log('compileSCState.isError', compileSC.isError);
+    if (compileSC.isError) {
+      toast({
+        variant: 'destructive',
+        title: 'Oops, something went wrong',
+        description: 'Relax, our AI friend is taking care of it!'
+      });
+
       await fixAndCompileSmartContract();
     }
 
-    console.log('fixAndCompileSCState.isError', fixAndCompileSCState.isError);
-    if (fixAndCompileSCState.isError) {
+    console.log('fixAndCompileSCState.isError', fixAndCompileSC.isError);
+    if (fixAndCompileSC.isError) {
+      toast({
+        variant: 'destructive',
+        title: 'Oops, my processor overheated',
+        description:
+          'Our AI friend could not figure out your requirements. Plase be more precise with your smart contract description and try again!'
+      });
+
       return;
     }
 
@@ -122,7 +126,7 @@ export default function SmartContractCustomisationSection({
     console.log('GENERATING SC');
 
     try {
-      dispatchGenerateSCState({ state: EReducerState.start, payload: '' });
+      setGenerateSC({ isLoading: true, isSuccess: false, isError: false, smartContract: '' });
 
       const selectedChainData = chainsData?.find((data) => data.chainName === selectedChain);
 
@@ -138,12 +142,17 @@ export default function SmartContractCustomisationSection({
         console.log('GENERATION RESPONSE', response);
 
         if (response && typeof response === 'string') {
-          dispatchGenerateSCState({ state: EReducerState.success, payload: response });
+          setGenerateSC({
+            isLoading: false,
+            isSuccess: true,
+            isError: false,
+            smartContract: response
+          });
         }
       }
     } catch (error) {
       if (error instanceof Error) {
-        dispatchGenerateSCState({ state: EReducerState.error, payload: '' });
+        setGenerateSC({ isLoading: false, isSuccess: false, isError: true, smartContract: '' });
       }
     }
   }
@@ -152,11 +161,11 @@ export default function SmartContractCustomisationSection({
     console.log('COMPILING SC');
 
     try {
-      dispatchCompileSCState({ state: EReducerState.start, payload: '' });
+      setCompileSC({ isLoading: true, isSuccess: false, isError: false, compilationOutput: '' });
 
       const response = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
-        generateSCState.smartContract
+        generateSC.smartContract
       );
 
       if (
@@ -170,14 +179,29 @@ export default function SmartContractCustomisationSection({
         console.log('COMPILATION RESPONSE', response);
 
         if (response.success && response.message === 'OK') {
-          dispatchCompileSCState({ state: EReducerState.success, payload: response.message });
+          setCompileSC({
+            isLoading: false,
+            isSuccess: true,
+            isError: false,
+            compilationOutput: ''
+          });
         } else {
-          dispatchCompileSCState({ state: EReducerState.error, payload: response.message });
+          setCompileSC({
+            isLoading: false,
+            isSuccess: false,
+            isError: true,
+            compilationOutput: response.message
+          });
         }
       }
     } catch (error) {
       if (error instanceof Error) {
-        dispatchCompileSCState({ state: EReducerState.error, payload: '' });
+        setCompileSC({
+          isLoading: false,
+          isSuccess: false,
+          isError: true,
+          compilationOutput: error.message
+        });
       }
     }
   }
@@ -185,21 +209,45 @@ export default function SmartContractCustomisationSection({
   // Feedback method - MAX ATTEMPTS 3
   async function fixAndCompileSmartContract() {
     try {
-      dispatchFixAndCompileSCState({ state: EReducerState.start, payload: '' });
+      setFixAndCompileSC({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+        fixedSmartContract: '',
+        compilationOutput: ''
+      });
 
       const response = await LlmService.buildCodeAndResolve(
         mapChainToCompileEndpoint(selectedChain),
-        generateSCState.smartContract
+        generateSC.smartContract
       );
 
-      if (response) {
-        console.log('FEEDBACK RESPONSE', response);
-
-        dispatchCompileSCState({ state: EReducerState.success, payload: response.message });
+      if (response.success && response.message === 'OK') {
+        setFixAndCompileSC({
+          isLoading: false,
+          isSuccess: true,
+          isError: false,
+          fixedSmartContract: response.code,
+          compilationOutput: response.message
+        });
+      } else {
+        setFixAndCompileSC({
+          isLoading: false,
+          isSuccess: false,
+          isError: true,
+          fixedSmartContract: response.code,
+          compilationOutput: response.message
+        });
       }
     } catch (error) {
       if (error instanceof Error) {
-        dispatchFixAndCompileSCState({ state: EReducerState.error, payload: '' });
+        setFixAndCompileSC({
+          isLoading: false,
+          isSuccess: false,
+          isError: true,
+          fixedSmartContract: '',
+          compilationOutput: error.message
+        });
       }
     }
   }
@@ -208,18 +256,40 @@ export default function SmartContractCustomisationSection({
     console.log('AUDITING SC');
 
     try {
-      dispatchAuditSCState({ state: EReducerState.start, payload: '' });
+      setAuditSC({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+        auditingOutput: ''
+      });
 
-      const response = await LlmService.callAuditorLLM(generateSCState.smartContract);
+      /* eslint-disable unicorn/no-nested-ternary */
+      const smartContractToAudit = compileSC.isSuccess
+        ? generateSC.smartContract
+        : fixAndCompileSC.isSuccess
+          ? fixAndCompileSC.fixedSmartContract
+          : '';
+
+      const response = await LlmService.callAuditorLLM(smartContractToAudit);
 
       if (response) {
         console.log('AUDIT RESPONSE', response);
 
-        dispatchAuditSCState({ state: EReducerState.success, payload: response });
+        setAuditSC({
+          isLoading: false,
+          isSuccess: true,
+          isError: false,
+          auditingOutput: response
+        });
       }
     } catch (error) {
       if (error instanceof Error) {
-        dispatchAuditSCState({ state: EReducerState.error, payload: '' });
+        setAuditSC({
+          isLoading: false,
+          isSuccess: true,
+          isError: false,
+          auditingOutput: error.message
+        });
       }
     }
   }
@@ -232,60 +302,16 @@ export default function SmartContractCustomisationSection({
 
       <div className='flex w-full items-center justify-between'>
         <Button
-          disabled={generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading}
+          disabled={generateSC.isLoading || compileSC.isLoading || auditSC.isLoading}
           onClick={initSmartContractIter}
         >
-          {generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading
+          {generateSC.isLoading || compileSC.isLoading || auditSC.isLoading
             ? 'Generating Smart Contract'
             : 'Generate Smart Contract'}
         </Button>
 
-        <GenerationStepsState
-          generateSCState={{
-            isLoading: generateSCState.isLoading,
-            isError: generateSCState.isError,
-            isSuccess:
-              !generateSCState.isLoading &&
-              !generateSCState.isError &&
-              generateSCState.smartContract !== ''
-          }}
-          compileSCState={{
-            isLoading: compileSCState.isLoading,
-            isError: compileSCState.isError,
-            isSuccess:
-              !compileSCState.isLoading &&
-              !compileSCState.isError &&
-              compileSCState.compilationOutput === 'OK'
-          }}
-          auditSCState={{
-            isLoading: auditSCState.isLoading,
-            isError: auditSCState.isError,
-            isSuccess:
-              !auditSCState.isLoading && !auditSCState.isError && auditSCState.auditingOutput !== ''
-          }}
-        />
+        <GenerationStepsState />
       </div>
     </SectionContainer>
   );
-}
-
-function mapChainToCompileEndpoint(selectedChain: string) {
-  switch (selectedChain) {
-    case 'Aurora':
-    case 'Base':
-    case 'Ethereum':
-    case 'Zeta': {
-      return 'solidity';
-    }
-    case 'Sway': {
-      return 'fuel';
-    }
-    // TODO: Fix MongoDB typo - Should be MultiversX
-    case 'Multiversx': {
-      return 'multiversx';
-    }
-    default: {
-      return '';
-    }
-  }
 }

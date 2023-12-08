@@ -9,9 +9,10 @@ import Ajv from 'ajv';
 
 dotenv.config();
 
-export type BuildResponse = {
+export type BuildResponseWithCode = {
 	success: boolean;
 	message: string;
+	code: string;
 };
 
 export class LlmService {
@@ -89,11 +90,11 @@ export class LlmService {
 		return this.trimCode(returnedCode, 'solidity');
 	}
 
-	// TODO: get language as parameter and match endpoint
+	// TODO: Fix return type - Compiler service does not return a field named 'code';
 	async buildCode(
 		chain: 'fuel' | 'multiversx' | 'solidity',
 		smartContractCode: string
-	): Promise<BuildResponse> {
+	): Promise<BuildResponseWithCode> {
 		const buildResponse = await axios.post(
 			`https://compiler-service.defibuilder.com/api/v1/${chain}`,
 			{ code: smartContractCode },
@@ -111,13 +112,14 @@ export class LlmService {
 		chain: 'fuel' | 'multiversx' | 'solidity',
 		smartContractCode: string,
 		maxTries = 3
-	): Promise<BuildResponse> {
+	): Promise<BuildResponseWithCode> {
 		console.log('FEEDBACK - ATTEMPT', maxTries);
 
 		const buildResponse = await this.buildCode(chain, smartContractCode);
 
-		if (maxTries === 0 || buildResponse.success) return buildResponse;
-		else {
+		if (maxTries === 0 || buildResponse.success) {
+			return { ...buildResponse, code: smartContractCode };
+		} else {
 			const newSmartContractCode = await this.callBuildResolverLLM(
 				smartContractCode,
 				buildResponse.message

@@ -3,61 +3,44 @@ import React from 'react';
 import { Check, Loader2, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import useSCIterStore from '@/store/smart-contract-iter';
 
-interface IGenerationStepsState {
-  generateSCState: {
-    isLoading: boolean;
-    isSuccess: boolean;
-    isError: boolean;
-  };
-  compileSCState: {
-    isLoading: boolean;
-    isError: boolean;
-    isSuccess: boolean;
-  };
-  auditSCState: {
-    isLoading: boolean;
-    isError: boolean;
-    isSuccess: boolean;
-  };
-}
+export default function GenerationStepsState() {
+  const generateSC = useSCIterStore((store) => store.generateSC);
+  const compileSC = useSCIterStore((store) => store.compileSC);
+  const auditSC = useSCIterStore((store) => store.auditSC);
 
-export default function GenerationStepsState({
-  generateSCState,
-  compileSCState,
-  auditSCState
-}: IGenerationStepsState) {
   const generationSteps = [
     {
       number: 1,
       step: 'Generating',
-      isLoading: generateSCState.isLoading,
-      isSuccess: generateSCState.isSuccess,
-      isError: generateSCState.isError,
+      isLoading: generateSC.isLoading,
+      isSuccess: generateSC.isSuccess,
+      isError: generateSC.isError,
       isStepConnected: true
     },
     {
       number: 2,
       step: 'Compiling',
-      isLoading: compileSCState.isLoading,
-      isSuccess: compileSCState.isSuccess,
-      isError: compileSCState.isError,
+      isLoading: compileSC.isLoading,
+      isSuccess: compileSC.isSuccess,
+      isError: compileSC.isError,
       isStepConnected: true
     },
     {
       number: 3,
       step: 'Auditing',
-      isLoading: auditSCState.isLoading,
-      isSuccess: auditSCState.isSuccess,
-      isError: auditSCState.isError,
+      isLoading: auditSC.isLoading,
+      isSuccess: auditSC.isSuccess,
+      isError: auditSC.isError,
       isStepConnected: true
     },
     {
       number: 4,
       step: 'Completed',
       isLoading: false,
-      isSuccess: generateSCState.isSuccess && compileSCState.isSuccess && auditSCState.isSuccess,
-      isError: generateSCState.isError && compileSCState.isError && auditSCState.isError,
+      isSuccess: generateSC.isSuccess && compileSC.isSuccess && auditSC.isSuccess,
+      isError: generateSC.isError && compileSC.isError && auditSC.isError,
       isStepConnected: false
     }
   ];
