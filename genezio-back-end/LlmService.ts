@@ -9,14 +9,31 @@ import Ajv from 'ajv';
 
 dotenv.config();
 
+export type BuildResponse = {
+	success: boolean;
+	message: string;
+};
+
 export class LlmService {
 	constructor() {
 		this.#connect();
 	}
+
 	#connect() {
 		mongoose.connect(process.env.MONGO_DB_URI || '').catch((error) => {
 			console.log('Error connecting to the DB', error);
 		});
+	}
+
+	private trimCode(code: string, language: string) {
+		const dynamicCodeMatch = new RegExp(
+			`\`\`\`${language}([\\s\\S]*?)\`\`\``,
+			'g'
+		);
+
+		const codeMatch = dynamicCodeMatch.exec(code);
+
+		return codeMatch ? codeMatch[1].trim() : code;
 	}
 
 	async getAllChains() {
@@ -30,6 +47,7 @@ export class LlmService {
 	) {
 		const reqData = JSON.parse(prompt); // TODO: use types
 		const chainData = await Chain.findOne({ id: activeChainId });
+
 		if (!chainData) throw new Error('Chain not found');
 
 		let { queryCode, query: queryStr, model } = chainData;
@@ -58,9 +76,9 @@ export class LlmService {
 			.replace('contract_example_defibuilder', contract_example);
 
 		const systemMsg =
-			'Your function is to parse and interpret user requests specifically for smart contract development. You must generate code snippets or complete smart contract code exclusively, without any explanatory or conversational text. Focus on the user-provided elements and examples to tailor the smart contract code precisely to their requirements. Be sure every smartcontract generated contains the correct events, modifiers, struct, functions, libraries and all the necessary logic parts. Use openzeppelin libraries when possible. Be sure onlyOwner functions have the correct modifier.';
+			'Your function is to parse and interpret user requests specifically for smart contract development. You must generate code snippets or complete smart contract code exclusively, without any explanatory or conversational text. Focus on the user-provided elements and examples to tailor the smart contract code precisely to their requirements. Be sure every smartcontract generated contains the correct events, modifiers, struct, functions, libraries and all the necessary logic parts. Use openzeppelin libraries when possible. Be sure onlyOwner functions have the correct modifier. Use pragma 0.8.19 everytime. Do not use SafeMath functions or library.';
 
-		const data = await retrieveDocsAndQueryLLM(
+		const returnedCode = await retrieveDocsAndQueryLLM(
 			updatedStr,
 			reqData.description,
 			model,
@@ -68,26 +86,17 @@ export class LlmService {
 			pinecone
 		);
 
-		// Declare this in separate function @ravirasadiya @thedefibuilder
-		const dynamicCodeMatch = new RegExp(
-			`\`\`\`${queryCode}([\\s\\S]*?)\`\`\``,
-			'g'
-		);
-
-		const solidityCodeMatch = dynamicCodeMatch.exec(data);
-		const solidityCode = solidityCodeMatch ? solidityCodeMatch[1].trim() : null;
-		if (solidityCode) {
-			return solidityCode;
-		} else {
-			return data;
-		}
+		return this.trimCode(returnedCode, 'solidity');
 	}
 
 	// TODO: get language as parameter and match endpoint
-	async buildCode(prompt: string) {
+	async buildCode(
+		chain: 'fuel' | 'multiversx' | 'solidity',
+		smartContractCode: string
+	): Promise<BuildResponse> {
 		const buildResponse = await axios.post(
-			'https://ai-build-api.defibuilder.com/api/v1/fuel',
-			{ code: prompt },
+			`https://compiler-service.defibuilder.com/api/v1/${chain}`,
+			{ code: smartContractCode },
 			{
 				headers: {
 					'X-API-KEY': process.env.X_API_KEY,
@@ -95,7 +104,56 @@ export class LlmService {
 			}
 		);
 
-		return buildResponse.data.status;
+		return buildResponse.data;
+	}
+
+	async buildCodeAndResolve(
+		chain: 'fuel' | 'multiversx' | 'solidity',
+		smartContractCode: string,
+		maxTries = 3
+	): Promise<BuildResponse> {
+		console.log('FEEDBACK - ATTEMPT', maxTries);
+
+		const buildResponse = await this.buildCode(chain, smartContractCode);
+
+		if (maxTries === 0 || buildResponse.success) return buildResponse;
+		else {
+			const newSmartContractCode = await this.callBuildResolverLLM(
+				smartContractCode,
+				buildResponse.message
+			);
+
+			return await this.buildCodeAndResolve(
+				chain,
+				newSmartContractCode,
+				maxTries - 1
+			);
+		}
+	}
+
+	async callBuildResolverLLM(code: string, compilerError: string) {
+		const systemMsg =
+			'Your task is to resolve compiler errors from the provided Solidity code. You must generate complete smart contract code exclusively without any explanatory or conversational text. You must not change any other parts of the code that are not related to solving the compiler error. You must provide back full code that compiles, not only the parts that need to be fixed.';
+		const prompt = `Resolve the following compiler error "${compilerError}" from the following Solidity code: \n ${code}`;
+
+		const builderResponse = await queryLLM(
+			[
+				{
+					role: 'system',
+					content: systemMsg,
+				},
+				{
+					role: 'user',
+					content: prompt,
+				},
+			],
+			'gpt-4-1106-preview',
+			0.2
+		);
+
+		const returnCode = builderResponse.choices[0].message.content || '';
+
+		return this.trimCode(returnCode, 'solidity');
 	}
 
 	async callAuditorLLM(code: string) {
@@ -147,6 +205,7 @@ export class LlmService {
 		);
 
 		const validateSchema = new Ajv().compile(auditSchema);
+
 		if (!validateSchema(parsedResponse)) {
 			return { audits: [] };
 		}

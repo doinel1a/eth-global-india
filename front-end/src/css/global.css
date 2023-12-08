@@ -71,11 +71,6 @@
     @apply border-border;
   }
 
-  html,
-  body {
-    @apply h-full w-full;
-  }
-
   body {
     @apply bg-background text-foreground;
   }

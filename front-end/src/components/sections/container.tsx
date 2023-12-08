@@ -1,6 +1,6 @@
-import type { PropsWithChildren } from 'react';
-
 import React from 'react';
+
+import type { PropsWithChildren } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,7 @@ export default function SectionContainer({
   ...properties
 }: ISectionContainer) {
   return (
-    <section className={cn('border-border w-full rounded-3xl border-2', className)} {...properties}>
+    <section className={cn('w-full rounded-3xl border-2 border-border', className)} {...properties}>
       {children}
     </section>
   );

@@ -11,15 +11,12 @@ module.exports = {
   bracketSameLine: false,
   arrowParens: 'always',
   endOfLine: 'crlf',
-  plugins: [
-    '@ianvs/prettier-plugin-sort-imports',
-    'prettier-plugin-tailwindcss'
-  ],
+  plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
   importOrder: [
+    '^react$',
+    '',
     '<TYPES>',
     '<TYPES>^[.]',
-    '',
-    '^react$',
     '',
     '<THIRD_PARTY_MODULES>',
     '',

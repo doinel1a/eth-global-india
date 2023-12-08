@@ -1,5 +1,6 @@
 import './scss/global.scss';
 import './css/global.css';
+import '@total-typescript/ts-reset';
 
 import React from 'react';
 
