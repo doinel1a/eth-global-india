@@ -9,6 +9,10 @@ import type {
   TState as TCompileSCState
 } from '@/reducers/compile-smart-contract';
 import type {
+  IAction as IFixAndCompileSCAction,
+  TState as TFixAndCompileSCState
+} from '@/reducers/fix-and-compile-smart-contract';
+import type {
   IAction as IGenerateSCAction,
   TState as TGenerateSCState
 } from '@/reducers/generate-smart-contract';
@@ -18,6 +22,10 @@ import EReducerState from '@/constants/reducer-state';
 import IChainData from '@/interfaces/chain-data';
 import { auditSCInitialState, auditSCReducer } from '@/reducers/audit-smart-contract';
 import { compileSCInitialState, compileSCReducer } from '@/reducers/compile-smart-contract';
+import {
+  fixAndCompileSCInitialState,
+  fixAndCompileSCReducer
+} from '@/reducers/fix-and-compile-smart-contract';
 import { generateSCInitialState, generateSCReducer } from '@/reducers/generate-smart-contract';
 import { LlmService } from '@/sdk/llmService.sdk';
 import useSelectedChainStore from '@/store/selected-chain';
@@ -70,10 +78,14 @@ export default function SmartContractCustomisationSection({
     Reducer<TCompileSCState, ICompileSCAction>
   >(compileSCReducer, compileSCInitialState);
 
-  const [auditSCState, dispatchAuditSCState] = useReducer<Reducer<IAuditSCState, IAduitSCAction>>(
-    auditSCReducer,
-    auditSCInitialState
-  );
+  const [fixAndCompileSCState, dispatchFixAndCompileSCState] = useReducer<
+    Reducer<TFixAndCompileSCState, IFixAndCompileSCAction>
+  >(fixAndCompileSCReducer, fixAndCompileSCInitialState);
+
+  // prettier-ignore
+  const [auditSCState, dispatchAuditSCState] = useReducer<
+    Reducer<IAuditSCState, IAduitSCAction>
+  >(auditSCReducer, auditSCInitialState);
 
   useEffect(() => {
     console.log('selectedChain', selectedChain);
@@ -86,16 +98,24 @@ export default function SmartContractCustomisationSection({
   async function initSmartContractIter() {
     dispatchGenerateSCState({ state: EReducerState.reset, payload: '' });
     dispatchCompileSCState({ state: EReducerState.reset, payload: '' });
+    dispatchFixAndCompileSCState({ state: EReducerState.reset, payload: '' });
     dispatchAuditSCState({ state: EReducerState.reset, payload: '' });
 
-    const generateSCResponse = await generateSmartContract();
-    // console.log('GENERATION RESPONSE', generateSCResponse);
+    await generateSmartContract();
 
-    const compileSCResponse = await compileSmartContract();
-    // console.log('COMPILATION RESPONSE', compileSCResponse);
+    await compileSmartContract();
 
-    const auditSCResponse = await auditSmartContract();
-    // console.log('AUDIT RESPONSE', auditSCResponse);
+    console.log('compileSCState.isError', compileSCState.isError);
+    if (compileSCState.isError) {
+      await fixAndCompileSmartContract();
+    }
+
+    console.log('fixAndCompileSCState.isError', fixAndCompileSCState.isError);
+    if (fixAndCompileSCState.isError) {
+      return;
+    }
+
+    await auditSmartContract();
   }
 
   async function generateSmartContract() {
@@ -158,6 +178,28 @@ export default function SmartContractCustomisationSection({
     } catch (error) {
       if (error instanceof Error) {
         dispatchCompileSCState({ state: EReducerState.error, payload: '' });
+      }
+    }
+  }
+
+  // Feedback method - MAX ATTEMPTS 3
+  async function fixAndCompileSmartContract() {
+    try {
+      dispatchFixAndCompileSCState({ state: EReducerState.start, payload: '' });
+
+      const response = await LlmService.buildCodeAndResolve(
+        mapChainToCompileEndpoint(selectedChain),
+        generateSCState.smartContract
+      );
+
+      if (response) {
+        console.log('FEEDBACK RESPONSE', response);
+
+        dispatchCompileSCState({ state: EReducerState.success, payload: response.message });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        dispatchFixAndCompileSCState({ state: EReducerState.error, payload: '' });
       }
     }
   }
@@ -238,6 +280,7 @@ function mapChainToCompileEndpoint(selectedChain: string) {
     case 'Sway': {
       return 'fuel';
     }
+    // Fix MongoDB typo
     case 'Multiversx': {
       return 'multiversx';
     }
