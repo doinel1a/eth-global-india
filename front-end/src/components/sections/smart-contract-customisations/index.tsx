@@ -280,7 +280,7 @@ function mapChainToCompileEndpoint(selectedChain: string) {
     case 'Sway': {
       return 'fuel';
     }
-    // Fix MongoDB typo
+    // TODO: Fix MongoDB typo - Should be MultiversX
     case 'Multiversx': {
       return 'multiversx';
     }

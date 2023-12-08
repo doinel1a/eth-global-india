@@ -170,6 +170,7 @@ function mapDataResponseToChain(data: unknown) {
     typeof data.PINECONE_ENV === 'string' &&
     'PINECONE_API_KEY' in data &&
     typeof data.PINECONE_API_KEY === 'string' &&
+    // TODO: Fix MongoDB typo - Should be base_templaTe
     'base_templace' in data &&
     typeof data.base_templace === 'string' &&
     'token_template' in data &&
