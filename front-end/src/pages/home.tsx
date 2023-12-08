@@ -7,18 +7,23 @@ import type {
 import type { Reducer } from 'react';
 
 import ChainSelectorSection from '@/components/sections/chain-selector';
-// import SmartContractCodeViewer from '@/components/sections/smart-contract-code-viewer';
+import SmartContractCodeViewer from '@/components/sections/smart-contract-code-viewer';
 import SmartContractCustomisationsSection from '@/components/sections/smart-contract-customisations';
 import EReducerState from '@/constants/reducer-state';
 import IChainData from '@/interfaces/chain-data';
 import { mapDataResponseToChain } from '@/lib/mappers';
 import { chainsDataInitialState, chainsDataReducer } from '@/reducers/chains-data';
 import { LlmService } from '@/sdk/llmService.sdk';
+import useSCIterStore from '@/store/smart-contract-iter';
 
 export default function HomePage() {
   const [chainsDataState, dispatchChainsDataState] = useReducer<
     Reducer<TChainsDataState, IChainsDataAction>
   >(chainsDataReducer, chainsDataInitialState);
+
+  const generateSC = useSCIterStore((store) => store.generateSC);
+  const compileSC = useSCIterStore((store) => store.compileSC);
+  const auditSC = useSCIterStore((store) => store.auditSC);
 
   useEffect(() => {
     async function getAllChainsData() {
@@ -59,7 +64,12 @@ export default function HomePage() {
         chainsData={chainsDataState.chainsData}
       />
       <SmartContractCustomisationsSection chainsData={chainsDataState.chainsData} />
-      {/* <SmartContractCodeViewer smartContractCode={smartContractCode} /> */}
+
+      {compileSC.isSuccess && auditSC.isSuccess ? (
+        <SmartContractCodeViewer smartContractCode={generateSC.smartContract} />
+      ) : (
+        <></>
+      )}
     </div>
   );
 }
