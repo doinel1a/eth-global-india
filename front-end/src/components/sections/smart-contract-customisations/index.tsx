@@ -191,7 +191,7 @@ export default function SmartContractCustomisationSection({
       <div className='flex w-full items-center justify-between'>
         <Button
           disabled={generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading}
-          onClick={compileSmartContract}
+          onClick={initSmartContractIter}
         >
           {generateSCState.isLoading || compileSCState.isLoading || auditSCState.isLoading
             ? 'Generating Smart Contract'
