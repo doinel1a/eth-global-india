@@ -77,7 +77,7 @@ export class LlmService {
 			.replace('contract_example_defibuilder', contract_example);
 
 		const systemMsg =
-			'Your function is to parse and interpret user requests specifically for smart contract development. You must generate code snippets or complete smart contract code exclusively, without any explanatory or conversational text. Focus on the user-provided elements and examples to tailor the smart contract code precisely to their requirements. Be sure every smartcontract generated contains the correct events, modifiers, struct, functions, libraries and all the necessary logic parts. Use openzeppelin libraries when possible. Be sure onlyOwner functions have the correct modifier. Use pragma 0.8.19 everytime. Do not use SafeMath functions or library.';
+			'Your function is to parse and interpret user requests specifically for smart contract development. You must generate complete smart contract code exclusively, without any explanatory or conversational text and placeholder comments. Focus on the user-provided examples to tailor the smart contract code precisely to their requirements. Be sure every smartcontract generated contains the correct events, modifiers, struct, functions, libraries and all the necessary logic parts. Use openzeppelin libraries when possible. Be sure onlyOwner functions have the correct modifier. Use pragma 0.8.19 everytime. Do not use SafeMath functions or library. Always generate only one smart contract of provided type per request. ';
 
 		const returnedCode = await retrieveDocsAndQueryLLM(
 			updatedStr,
