@@ -66,29 +66,10 @@ export default function SmartContractCustomisationSection({
 
     await compileSmartContract();
 
-    const { compileSC } = useSCIterStore.getState();
+    const { compileSC, generateSC } = useSCIterStore.getState();
 
     if (compileSC.isError) {
-      toast({
-        variant: 'destructive',
-        title: 'Oops, something went wrong',
-        description: 'Relax, our AI friend is taking care of it!'
-      });
-
-      await fixAndCompileSmartContract();
-    }
-
-    const { fixAndCompileSC } = useSCIterStore.getState();
-
-    if (fixAndCompileSC.isError) {
-      toast({
-        variant: 'destructive',
-        title: 'Oops, my processor overheated',
-        description:
-          'Our AI friend could not figure out your requirements. Plase be more precise with your smart contract description and try again!'
-      });
-
-      return;
+      await fixAndCompileSmartContract(generateSC.smartContract, compileSC.compilationOutput);
     }
 
     await auditSmartContract();
@@ -181,39 +162,60 @@ export default function SmartContractCustomisationSection({
   }
 
   // Feedback method - MAX ATTEMPTS 3
-  async function fixAndCompileSmartContract() {
+  async function fixAndCompileSmartContract(code: string, errorMsg: string, maxTries = 3) {
+    console.log('FIXING AND COMPILING SC', maxTries);
+
     try {
-      setFixAndCompileSC({
-        isLoading: true,
-        isSuccess: false,
-        isError: false,
-        fixedSmartContract: '',
-        compilationOutput: ''
+      toast({
+        variant: 'destructive',
+        title: 'Oops, compilation did not succeed.',
+        description: `Relax, our AI friend is taking care of it! Remaining Attempts: ${maxTries}`
       });
 
-      const { generateSC } = useSCIterStore.getState();
-
-      const response = await LlmService.buildCodeAndResolve(
+      setCompileSC({ isLoading: true, isSuccess: false, isError: false, compilationOutput: '' });
+      const newCode = await LlmService.callBuildResolverLLM(code, errorMsg);
+      const buildResponse = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
-        generateSC.smartContract
+        newCode
       );
 
-      if (response.success && response.message === 'OK') {
+      if (buildResponse.success && buildResponse.message === 'OK') {
+        console.log('COMPILED AFTER FIXING', buildResponse);
         setFixAndCompileSC({
           isLoading: false,
           isSuccess: true,
           isError: false,
-          fixedSmartContract: response.code,
-          compilationOutput: response.message
+          fixedSmartContract: newCode,
+          compilationOutput: buildResponse.message
         });
-      } else {
+        setCompileSC({
+          isLoading: false,
+          isSuccess: true,
+          isError: false,
+          compilationOutput: buildResponse.message
+        });
+      } else if (!buildResponse.success && maxTries == 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Oops, my processor overheated',
+          description:
+            'Our AI friend could not figure out your requirements. Plase be more precise with your smart contract description and try again!'
+        });
         setFixAndCompileSC({
           isLoading: false,
           isSuccess: false,
           isError: true,
-          fixedSmartContract: response.code,
-          compilationOutput: response.message
+          fixedSmartContract: newCode,
+          compilationOutput: buildResponse.message
         });
+        setCompileSC({
+          isLoading: false,
+          isSuccess: false,
+          isError: true,
+          compilationOutput: buildResponse.message
+        });
+      } else {
+        fixAndCompileSmartContract(newCode, buildResponse.message, maxTries - 1);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -222,6 +224,12 @@ export default function SmartContractCustomisationSection({
           isSuccess: false,
           isError: true,
           fixedSmartContract: '',
+          compilationOutput: error.message
+        });
+        setCompileSC({
+          isLoading: false,
+          isSuccess: false,
+          isError: true,
           compilationOutput: error.message
         });
       }
@@ -237,9 +245,7 @@ export default function SmartContractCustomisationSection({
         auditingOutput: []
       });
 
-      const { compileSC } = useSCIterStore.getState();
-      const { generateSC } = useSCIterStore.getState();
-      const { fixAndCompileSC } = useSCIterStore.getState();
+      const { compileSC, generateSC, fixAndCompileSC } = useSCIterStore.getState();
 
       /* eslint-disable unicorn/no-nested-ternary */
       const smartContractToAudit = compileSC.isSuccess
@@ -260,10 +266,16 @@ export default function SmartContractCustomisationSection({
         const audits: IAuditResponse[] = [];
 
         for (const audit of response.audits) {
-          if (audit && typeof audit === 'object' && 'severity' in audit && 'description' in audit) {
-            console.log('CIAO');
+          if (
+            audit &&
+            typeof audit === 'object' &&
+            'severity' in audit &&
+            'description' in audit &&
+            'title' in audit
+          ) {
             audits.push({
               severity: audit.severity,
+              title: audit.title,
               description: audit.description
             });
           }
@@ -309,3 +321,4 @@ export default function SmartContractCustomisationSection({
     </SectionContainer>
   );
 }
+
