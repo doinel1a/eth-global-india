@@ -12,15 +12,20 @@ interface IGenerateSCState extends ICommonState {
 
 interface ICompileSCState extends ICommonState {
   compilationOutput: string;
+  artifact: any; // Hardhat Artifact
 }
 
-interface IFixAndCompileSCState extends ICommonState {
+interface IFixAndCompileSCState extends ICompileSCState {
   fixedSmartContract: string;
-  compilationOutput: string;
 }
 
 interface IAuditSCState extends ICommonState {
   auditingOutput: string;
+}
+
+interface IDeploySCState extends ICommonState {
+  deploymentAddress: string;
+  // args: uknown[];
 }
 
 interface IState {
@@ -28,6 +33,7 @@ interface IState {
   compileSC: ICompileSCState;
   fixAndCompileSC: IFixAndCompileSCState;
   auditSC: IAuditSCState;
+  deploySC: IDeploySCState;
 }
 
 interface IActions {
@@ -35,6 +41,7 @@ interface IActions {
   setCompileSC: (state: ICompileSCState) => void;
   setFixAndCompileSC: (state: IFixAndCompileSCState) => void;
   setAuditSC: (state: IAuditSCState) => void;
+  setDeploySC: (state: IDeploySCState) => void;
   reset: () => void;
 }
 
@@ -49,20 +56,28 @@ const initialState: IState = {
     isLoading: false,
     isSuccess: false,
     isError: false,
-    compilationOutput: ''
+    compilationOutput: '',
+    artifact: {}
   },
   fixAndCompileSC: {
     isLoading: false,
     isSuccess: false,
     isError: false,
     fixedSmartContract: '',
-    compilationOutput: ''
+    compilationOutput: '',
+    artifact: {}
   },
   auditSC: {
     isLoading: false,
     isSuccess: false,
     isError: false,
     auditingOutput: ''
+  },
+  deploySC: {
+    isLoading: false,
+    isSuccess: false,
+    isError: false,
+    deploymentAddress: ''
   }
 };
 
@@ -76,9 +91,12 @@ const useSCIterStore = create<IState & IActions>((set) => ({
     set((previousState) => ({ fixAndCompileSC: { ...previousState.fixAndCompileSC, ...state } })),
   setAuditSC: (state: IAuditSCState) =>
     set((previousState) => ({ auditSC: { ...previousState.auditSC, ...state } })),
+  setDeploySC: (state: IDeploySCState) =>
+    set((previousState) => ({ deploySC: { ...previousState.deploySC, ...state } })),
   reset: () => {
     set(initialState);
   }
 }));
 
 export default useSCIterStore;
+
