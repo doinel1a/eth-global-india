@@ -47,9 +47,9 @@ export default function SmartContractCustomisationSection({
   const selectedSCTemplate = useSCCustomisationsStore((store) => store.scCustomisations.template);
   const selectedSCFeatures = useSCCustomisationsStore((store) => store.scCustomisations.features);
 
-  const generateSC = useSCIterStore((store) => store.generateSC);
-  const compileSC = useSCIterStore((store) => store.compileSC);
-  const auditSC = useSCIterStore((store) => store.auditSC);
+  const { generateSC } = useSCIterStore.getState();
+  const { compileSC } = useSCIterStore.getState();
+  const { auditSC } = useSCIterStore.getState();
 
   const setGenerateSC = useSCIterStore((store) => store.setGenerateSC);
   const setCompileSC = useSCIterStore((store) => store.setCompileSC);
@@ -135,6 +135,8 @@ export default function SmartContractCustomisationSection({
     try {
       setCompileSC({ isLoading: true, isSuccess: false, isError: false, compilationOutput: '' });
 
+      const { generateSC } = useSCIterStore.getState();
+
       const response = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
         generateSC.smartContract
@@ -189,6 +191,8 @@ export default function SmartContractCustomisationSection({
         compilationOutput: ''
       });
 
+      const { generateSC } = useSCIterStore.getState();
+
       const response = await LlmService.buildCodeAndResolve(
         mapChainToCompileEndpoint(selectedChain),
         generateSC.smartContract
@@ -234,6 +238,7 @@ export default function SmartContractCustomisationSection({
       });
 
       const { compileSC } = useSCIterStore.getState();
+      const { generateSC } = useSCIterStore.getState();
       const { fixAndCompileSC } = useSCIterStore.getState();
 
       /* eslint-disable unicorn/no-nested-ternary */
