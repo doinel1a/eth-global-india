@@ -6,6 +6,7 @@ import type {
 } from '@/reducers/chains-data';
 import type { Reducer } from 'react';
 
+import AuditSection from '@/components/sections/audit';
 import ChainSelectorSection from '@/components/sections/chain-selector';
 import SmartContractCodeViewer from '@/components/sections/smart-contract-code-viewer';
 import SmartContractCustomisationsSection from '@/components/sections/smart-contract-customisations';
@@ -23,6 +24,7 @@ export default function HomePage() {
 
   const generateSC = useSCIterStore((store) => store.generateSC);
   const compileSC = useSCIterStore((store) => store.compileSC);
+  const fixAndCompileSC = useSCIterStore((store) => store.fixAndCompileSC);
   const auditSC = useSCIterStore((store) => store.auditSC);
 
   useEffect(() => {
@@ -65,8 +67,11 @@ export default function HomePage() {
       />
       <SmartContractCustomisationsSection chainsData={chainsDataState.chainsData} />
 
-      {compileSC.isSuccess && auditSC.isSuccess ? (
-        <SmartContractCodeViewer smartContractCode={generateSC.smartContract} />
+      {(compileSC.isSuccess || fixAndCompileSC.isSuccess) && auditSC.isSuccess ? (
+        <>
+          <AuditSection />
+          <SmartContractCodeViewer smartContractCode={generateSC.smartContract} />
+        </>
       ) : (
         <></>
       )}

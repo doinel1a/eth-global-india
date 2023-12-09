@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import IAuditResponse from '@/interfaces/audit-response';
+
 interface ICommonState {
   isLoading: boolean;
   isSuccess: boolean;
@@ -20,7 +22,7 @@ interface IFixAndCompileSCState extends ICommonState {
 }
 
 interface IAuditSCState extends ICommonState {
-  auditingOutput: string;
+  auditingOutput: IAuditResponse[] | string;
 }
 
 interface IState {
@@ -62,7 +64,7 @@ const initialState: IState = {
     isLoading: false,
     isSuccess: false,
     isError: false,
-    auditingOutput: ''
+    auditingOutput: [] as IAuditResponse[]
   }
 };
 
