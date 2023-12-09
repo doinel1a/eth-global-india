@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ContractFactory } from 'ethers';
+import { BrowserProvider, ContractFactory } from 'ethers';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -283,16 +283,22 @@ export default function SmartContractCustomisationSection({
   async function deployContract() {
     try {
       console.log('DEPLOYING SUCA');
+      if (!window.ethereum) throw new Error('No ethereum provider found');
       const { compileSC } = useSCIterStore.getState();
       console.log('ARTIFACT', compileSC.artifact);
       setDeploySC({ isLoading: true, isSuccess: false, isError: false, deploymentAddress: '' });
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      console.log('SIGNER', signer.address);
       const contractFactory = new ContractFactory(
         compileSC.artifact.abi,
-        compileSC.artifact.bytecode
-        /** signer */
+        compileSC.artifact.bytecode,
+        signer
       );
+      console.log('CONTRACT FACTORY', contractFactory);
 
       const deployedContract = await contractFactory.deploy(/** args */);
+      console.log('DEPLOYED CONTRACT', deployedContract);
       const deploymentAddress = await deployedContract.getAddress();
       await deployedContract.waitForDeployment();
       setDeploySC({
@@ -304,6 +310,7 @@ export default function SmartContractCustomisationSection({
       console.log('DEPLOY TX MINED SASATI LA PIDARI', deploymentAddress);
     } catch (error) {
       if (error instanceof Error) {
+        console.log('ERROR', error);
         setDeploySC({ isLoading: false, isSuccess: false, isError: true, deploymentAddress: '' });
       }
     }
