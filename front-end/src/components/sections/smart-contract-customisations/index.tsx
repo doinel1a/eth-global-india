@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { BrowserProvider, ContractFactory } from 'ethers';
-
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import IAuditResponse from '@/interfaces/audit-response';
@@ -57,7 +55,6 @@ export default function SmartContractCustomisationSection({
   const setCompileSC = useSCIterStore((store) => store.setCompileSC);
   const setFixAndCompileSC = useSCIterStore((store) => store.setFixAndCompileSC);
   const setAuditSC = useSCIterStore((store) => store.setAuditSC);
-  const setDeploySC = useSCIterStore((store) => store.setDeploySC);
   const resetSCIterState = useSCIterStore((store) => store.reset);
 
   const { toast } = useToast();
@@ -322,42 +319,6 @@ export default function SmartContractCustomisationSection({
     }
   }
 
-  async function deployContract() {
-    try {
-      console.log('DEPLOYING SUCA');
-      if (!window.ethereum) throw new Error('No ethereum provider found');
-      const { compileSC } = useSCIterStore.getState();
-      console.log('ARTIFACT', compileSC.artifact);
-      setDeploySC({ isLoading: true, isSuccess: false, isError: false, deploymentAddress: '' });
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      console.log('SIGNER', signer.address);
-      const contractFactory = new ContractFactory(
-        compileSC.artifact.abi,
-        compileSC.artifact.bytecode,
-        signer
-      );
-      console.log('CONTRACT FACTORY', contractFactory);
-
-      const deployedContract = await contractFactory.deploy(/** args */);
-      console.log('DEPLOYED CONTRACT', deployedContract);
-      const deploymentAddress = await deployedContract.getAddress();
-      await deployedContract.waitForDeployment();
-      setDeploySC({
-        isLoading: false,
-        isSuccess: true,
-        isError: false,
-        deploymentAddress: deploymentAddress
-      });
-      console.log('DEPLOY TX MINED SASATI LA PIDARI', deploymentAddress);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log('ERROR', error);
-        setDeploySC({ isLoading: false, isSuccess: false, isError: true, deploymentAddress: '' });
-      }
-    }
-  }
-
   return (
     <SectionContainer className='flex flex-col items-start justify-between gap-y-10 px-10 py-12 backdrop-blur-md'>
       <SmartContractTemplates scTemplates={scTemplates} />
@@ -374,11 +335,8 @@ export default function SmartContractCustomisationSection({
             : 'Generate Smart Contract'}
         </Button>
 
-        <Button onClick={deployContract}>Deploy the Motherfucker</Button>
-
         <GenerationStepsState />
       </div>
     </SectionContainer>
   );
 }
-

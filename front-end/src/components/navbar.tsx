@@ -41,9 +41,7 @@ export default function Navbar() {
             </Button>
           ))}
 
-          <Button variant='default' className='ml-2.5'>
-            Connect wallet
-          </Button>
+          <w3m-button />
         </div>
       </nav>
     </header>

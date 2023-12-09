@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prevent-abbreviations */
+
 import { EIP1193Provider } from 'ethers';
 
 declare global {
@@ -5,4 +7,3 @@ declare global {
     ethereum?: EIP1193Provider;
   }
 }
-
