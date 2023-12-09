@@ -4,6 +4,7 @@ import { BrowserProvider, ContractFactory } from 'ethers';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import IAuditResponse from '@/interfaces/audit-response';
 import IChainData from '@/interfaces/chain-data';
 import { mapChainToCompileEndpoint } from '@/lib/mappers';
 import { LlmService } from '@/sdk/llmService.sdk';
@@ -48,9 +49,9 @@ export default function SmartContractCustomisationSection({
   const selectedSCTemplate = useSCCustomisationsStore((store) => store.scCustomisations.template);
   const selectedSCFeatures = useSCCustomisationsStore((store) => store.scCustomisations.features);
 
-  const generateSC = useSCIterStore((store) => store.generateSC);
-  const compileSC = useSCIterStore((store) => store.compileSC);
-  const auditSC = useSCIterStore((store) => store.auditSC);
+  const { generateSC } = useSCIterStore.getState();
+  const { compileSC } = useSCIterStore.getState();
+  const { auditSC } = useSCIterStore.getState();
 
   const setGenerateSC = useSCIterStore((store) => store.setGenerateSC);
   const setCompileSC = useSCIterStore((store) => store.setCompileSC);
@@ -141,6 +142,8 @@ export default function SmartContractCustomisationSection({
         artifact: {}
       });
 
+      const { generateSC } = useSCIterStore.getState();
+
       const response = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
         generateSC.smartContract
@@ -199,6 +202,8 @@ export default function SmartContractCustomisationSection({
         artifact: {}
       });
 
+      const { generateSC } = useSCIterStore.getState();
+
       const response = await LlmService.buildCodeAndResolve(
         mapChainToCompileEndpoint(selectedChain),
         generateSC.smartContract
@@ -243,10 +248,11 @@ export default function SmartContractCustomisationSection({
         isLoading: true,
         isSuccess: false,
         isError: false,
-        auditingOutput: ''
+        auditingOutput: []
       });
 
       const { compileSC } = useSCIterStore.getState();
+      const { generateSC } = useSCIterStore.getState();
       const { fixAndCompileSC } = useSCIterStore.getState();
 
       /* eslint-disable unicorn/no-nested-ternary */
@@ -257,15 +263,31 @@ export default function SmartContractCustomisationSection({
           : '';
 
       const response = await LlmService.callAuditorLLM(smartContractToAudit);
+      console.log('AUDIT RESPONSE', response);
 
-      if (response) {
-        console.log('AUDIT RESPONSE', response);
+      if (
+        response &&
+        typeof response === 'object' &&
+        'audits' in response &&
+        Array.isArray(response.audits)
+      ) {
+        const audits: IAuditResponse[] = [];
+
+        for (const audit of response.audits) {
+          if (audit && typeof audit === 'object' && 'severity' in audit && 'description' in audit) {
+            console.log('CIAO');
+            audits.push({
+              severity: audit.severity,
+              description: audit.description
+            });
+          }
+        }
 
         setAuditSC({
           isLoading: false,
           isSuccess: true,
           isError: false,
-          auditingOutput: response
+          auditingOutput: audits
         });
       }
     } catch (error) {
