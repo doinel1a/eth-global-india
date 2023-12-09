@@ -90,7 +90,7 @@ export default function AuditSection() {
         )}
       </div>
 
-      <div className='flex h-60 w-full gap-x-2.5'>
+      <div className='flex h-64 w-full gap-x-2.5'>
         <Card className='h-full w-1/3'>
           <CardHeader className='relative h-24'>
             <CardTitle>Audit score</CardTitle>
@@ -100,7 +100,7 @@ export default function AuditSection() {
               max={100}
               className={cn('w-full', {
                 '[&>div]:bg-red-400': auditScore < 35,
-                '[&>div]:bg-orange-400': auditScore >= 35 && auditScore < 65,
+                '[&>div]:bg-yellow-400': auditScore >= 35 && auditScore < 65,
                 '[&>div]:bg-green-400': auditScore >= 65
               })}
             />
@@ -128,26 +128,26 @@ export default function AuditSection() {
           </div>
         </Card>
 
-        <Card className='h-full w-2/3'>
+        <Card className='h-full w-2/3 overflow-hidden'>
           <CardHeader className='h-24'>
             <CardTitle>Risk factors</CardTitle>
           </CardHeader>
 
           <Separator className='mt-2.5 h-[1px] w-full bg-border' />
 
-          <div className='flex flex-col justify-between gap-y-1.5 p-6'>
+          <div className='flex h-full flex-col justify-between gap-y-1.5 overflow-scroll p-6'>
             {typeof auditResponse === 'string' ||
             (Array.isArray(auditResponse) && auditResponse.length === 0) ? (
               <p>No relevant risks to show.</p>
             ) : (
-              <div>
+              <>
                 {auditResponse.map((audit, index) => (
                   <div key={`${audit.title}-${index}`} className='flex justify-between'>
                     <p>{audit.title}</p>
                     <p
                       className={cn('font-bold uppercase', {
                         'text-red-400': audit.severity === 'High',
-                        'text-orange-400': audit.severity === 'Medium',
+                        'text-yellow-400': audit.severity === 'Medium',
                         'text-green-400': audit.severity === 'Low'
                       })}
                     >
@@ -156,7 +156,7 @@ export default function AuditSection() {
                     </p>
                   </div>
                 ))}
-              </div>
+              </>
             )}
           </div>
         </Card>

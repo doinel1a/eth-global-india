@@ -169,7 +169,7 @@ export default function SmartContractCustomisationSection({
   }
 
   // Feedback method - MAX ATTEMPTS 3
-  async function fixAndCompileSmartContract(code: string, errorMsg: string, maxTries = 3) {
+  async function fixAndCompileSmartContract(code: string, errorMessage: string, maxTries = 3) {
     console.log('FIXING AND COMPILING SC', maxTries);
 
     try {
@@ -186,7 +186,7 @@ export default function SmartContractCustomisationSection({
         compilationOutput: '',
         artifact: {}
       });
-      const newCode = await LlmService.callBuildResolverLLM(code, errorMsg);
+      const newCode = await LlmService.callBuildResolverLLM(code, errorMessage);
       const buildResponse = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
         newCode
@@ -273,7 +273,11 @@ export default function SmartContractCustomisationSection({
           ? fixAndCompileSC.fixedSmartContract
           : '';
 
-      const response = await LlmService.callAuditorLLM(smartContractToAudit);
+      const selectedChainData = chainsData?.find((data) => data.chainName === selectedChain);
+      const activeChainId = selectedChainData ? selectedChainData.id : '';
+
+      const response = await LlmService.callAuditorLLM(smartContractToAudit, activeChainId);
+
       console.log('AUDIT RESPONSE', response);
 
       if (
