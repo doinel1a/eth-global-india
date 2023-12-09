@@ -32,12 +32,13 @@ interface IState {
 
 interface IActions {
   setGenerateSC: (state: IGenerateSCState) => void;
-  setAuditSC: (state: IAuditSCState) => void;
-  setFixAndCompileSC: (state: IFixAndCompileSCState) => void;
   setCompileSC: (state: ICompileSCState) => void;
+  setFixAndCompileSC: (state: IFixAndCompileSCState) => void;
+  setAuditSC: (state: IAuditSCState) => void;
+  reset: () => void;
 }
 
-const useSCIterStore = create<IState & IActions>((set) => ({
+const initialState: IState = {
   generateSC: {
     isLoading: false,
     isSuccess: false,
@@ -62,7 +63,11 @@ const useSCIterStore = create<IState & IActions>((set) => ({
     isSuccess: false,
     isError: false,
     auditingOutput: ''
-  },
+  }
+};
+
+const useSCIterStore = create<IState & IActions>((set) => ({
+  ...initialState,
   setGenerateSC: (state: IGenerateSCState) =>
     set((previousState) => ({ generateSC: { ...previousState.generateSC, ...state } })),
   setCompileSC: (state: ICompileSCState) =>
@@ -70,7 +75,10 @@ const useSCIterStore = create<IState & IActions>((set) => ({
   setFixAndCompileSC: (state: IFixAndCompileSCState) =>
     set((previousState) => ({ fixAndCompileSC: { ...previousState.fixAndCompileSC, ...state } })),
   setAuditSC: (state: IAuditSCState) =>
-    set((previousState) => ({ auditSC: { ...previousState.auditSC, ...state } }))
+    set((previousState) => ({ auditSC: { ...previousState.auditSC, ...state } })),
+  reset: () => {
+    set(initialState);
+  }
 }));
 
 export default useSCIterStore;

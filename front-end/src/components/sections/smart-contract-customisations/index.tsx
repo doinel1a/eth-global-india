@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -42,61 +42,31 @@ export default function SmartContractCustomisationSection({
 }: ISmartContractCustomisationSection) {
   const selectedChain = useSelectedChainStore((store) => store.selectedChain);
 
-  const scCustomisations = useSCCustomisationsStore((store) => store.scCustomisations);
-
   const scDescription = useSCCustomisationsStore((store) => store.scCustomisations.description);
   const selectedSCTemplate = useSCCustomisationsStore((store) => store.scCustomisations.template);
   const selectedSCFeatures = useSCCustomisationsStore((store) => store.scCustomisations.features);
 
   const generateSC = useSCIterStore((store) => store.generateSC);
   const compileSC = useSCIterStore((store) => store.compileSC);
-  const fixAndCompileSC = useSCIterStore((store) => store.fixAndCompileSC);
   const auditSC = useSCIterStore((store) => store.auditSC);
 
   const setGenerateSC = useSCIterStore((store) => store.setGenerateSC);
   const setCompileSC = useSCIterStore((store) => store.setCompileSC);
   const setFixAndCompileSC = useSCIterStore((store) => store.setFixAndCompileSC);
   const setAuditSC = useSCIterStore((store) => store.setAuditSC);
+  const resetSCIterState = useSCIterStore((store) => store.reset);
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    console.log('selectedChain', selectedChain);
-  }, [selectedChain]);
-
-  useEffect(() => {
-    console.log('scCustomisations', scCustomisations);
-  }, [scCustomisations]);
-
-  useEffect(() => {
-    console.log('GENERATE SC', generateSC);
-  }, [generateSC]);
-  useEffect(() => {
-    console.log('FIX AND COMPILE SC', fixAndCompileSC);
-  }, [fixAndCompileSC]);
-
   async function initSmartContractIter() {
-    setGenerateSC({ isLoading: false, isSuccess: false, isError: false, smartContract: '' });
-    setCompileSC({ isLoading: false, isSuccess: false, isError: false, compilationOutput: '' });
-    setFixAndCompileSC({
-      isLoading: false,
-      isSuccess: false,
-      isError: false,
-      fixedSmartContract: '',
-      compilationOutput: ''
-    });
-    setAuditSC({
-      isLoading: false,
-      isSuccess: false,
-      isError: false,
-      auditingOutput: ''
-    });
+    resetSCIterState();
 
     await generateSmartContract();
 
     await compileSmartContract();
 
-    console.log('compileSCState.isError', compileSC.isError);
+    const { compileSC } = useSCIterStore.getState();
+
     if (compileSC.isError) {
       toast({
         variant: 'destructive',
@@ -107,7 +77,8 @@ export default function SmartContractCustomisationSection({
       await fixAndCompileSmartContract();
     }
 
-    console.log('fixAndCompileSCState.isError', fixAndCompileSC.isError);
+    const { fixAndCompileSC } = useSCIterStore.getState();
+
     if (fixAndCompileSC.isError) {
       toast({
         variant: 'destructive',
@@ -253,8 +224,6 @@ export default function SmartContractCustomisationSection({
   }
 
   async function auditSmartContract() {
-    console.log('AUDITING SC');
-
     try {
       setAuditSC({
         isLoading: true,
@@ -262,6 +231,9 @@ export default function SmartContractCustomisationSection({
         isError: false,
         auditingOutput: ''
       });
+
+      const { compileSC } = useSCIterStore.getState();
+      const { fixAndCompileSC } = useSCIterStore.getState();
 
       /* eslint-disable unicorn/no-nested-ternary */
       const smartContractToAudit = compileSC.isSuccess
