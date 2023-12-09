@@ -140,7 +140,23 @@ export default function AuditSection() {
             (Array.isArray(auditResponse) && auditResponse.length === 0) ? (
               <p>No relevant risks to show.</p>
             ) : (
-              <></>
+              <div>
+                {auditResponse.map((audit, index) => (
+                  <div key={`${audit.title}-${index}`} className='flex justify-between'>
+                    <p>{audit.title}</p>
+                    <p
+                      className={cn('font-bold uppercase', {
+                        'text-red-400': audit.severity === 'High',
+                        'text-orange-400': audit.severity === 'Medium',
+                        'text-green-400': audit.severity === 'Low'
+                      })}
+                    >
+                      {audit.severity === 'Low' || audit.severity === 'High' ? 'Very ' : ''}
+                      {audit.severity}
+                    </p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </Card>
