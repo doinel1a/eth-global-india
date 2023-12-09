@@ -22,7 +22,8 @@ const queryLLM = async (
   messages: any[],
   model: string,
   temperature: number,
-  jsonMode?: boolean
+  jsonMode?: boolean,
+  seed = 1337
 ) => {
   let response;
   try {
@@ -31,7 +32,7 @@ const queryLLM = async (
       messages: messages,
       max_tokens: 4096,
       temperature: temperature,
-      seed: 1337,
+      seed,
       response_format: {
         type: jsonMode ? 'json_object' : 'text',
       },
