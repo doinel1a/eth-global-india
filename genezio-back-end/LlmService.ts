@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import Chain from './models/ChainModel';
-import ChainAudit from './models/ChainAuditsModel';
+import ChainAuditSchema from './models/ChainAuditsModel'; 
 import { queryLLM, retrieveDocsAndQueryLLM } from './openaihelper';
 import { initPineconeClient } from './pinecone';
 import Ajv from 'ajv';
@@ -168,7 +168,7 @@ export class LlmService {
     return this.trimCode(returnCode, 'solidity');
   }
 
-  async callAuditorLLM(code: string, maxTries = 3): Promise<AuditorResponse> {
+  async callAuditorLLM(code: string,activeChainId: string, maxTries = 3): Promise<AuditorResponse> {
     const auditSchema = {
       type: 'object',
       properties: {
@@ -194,8 +194,12 @@ export class LlmService {
       auditSchema
     )} by carefully including the title, severity and description of the issue, given the following code: \n ${code}`;
     const systemMsg = `Your task is to analyze and assess smart contracts for auditing purposes by identifying the severity of the vulnerabilities, summarize them in a short title and description. The report should be generated in JSON format and should always follow the provided schema.`;
-    const auditorModel = 'ft:gpt-3.5-turbo-1106:personal::8Pw67TV2';
+    
+    const chainAuditData = await ChainAuditSchema.findOne({ id: activeChainId });
+		if (!chainAuditData) throw new Error('Chain not found');
 
+		// Use the auditor model from the chain data
+		const auditorModel = chainAuditData.auditorModel || 'ft:gpt-3.5-turbo-1106:personal::8Pw67TV2'; 
     console.log('FEEDBACK - ATTEMPT', maxTries);
     try {
       const auditResponse = await queryLLM(

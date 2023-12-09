@@ -273,7 +273,11 @@ export default function SmartContractCustomisationSection({
           ? fixAndCompileSC.fixedSmartContract
           : '';
 
-      const response = await LlmService.callAuditorLLM(smartContractToAudit);
+      const selectedChainData = chainsData?.find((data) => data.chainName === selectedChain);
+      const activeChainId = selectedChainData ? selectedChainData.id : '';
+
+      const response = await LlmService.callAuditorLLM(smartContractToAudit,activeChainId);
+      
       console.log('AUDIT RESPONSE', response);
 
       if (
