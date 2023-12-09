@@ -14,7 +14,7 @@ interface IGenerateSCState extends ICommonState {
 
 interface ICompileSCState extends ICommonState {
   compilationOutput: string;
-  artifact: any; // Hardhat Artifact
+  artifact: unknown; // Hardhat Artifact
 }
 
 interface IFixAndCompileSCState extends ICompileSCState {
@@ -101,4 +101,3 @@ const useSCIterStore = create<IState & IActions>((set) => ({
 }));
 
 export default useSCIterStore;
-
