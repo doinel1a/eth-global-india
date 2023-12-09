@@ -26,6 +26,11 @@ export default function HomePage() {
   const compileSC = useSCIterStore((store) => store.compileSC);
   const fixAndCompileSC = useSCIterStore((store) => store.fixAndCompileSC);
   const auditSC = useSCIterStore((store) => store.auditSC);
+  const finalSmartContractCode = compileSC.isSuccess
+    ? generateSC.smartContract
+    : fixAndCompileSC.isSuccess
+      ? fixAndCompileSC.fixedSmartContract
+      : '';
 
   useEffect(() => {
     async function getAllChainsData() {
@@ -70,7 +75,7 @@ export default function HomePage() {
       {(compileSC.isSuccess || fixAndCompileSC.isSuccess) && auditSC.isSuccess ? (
         <>
           <AuditSection />
-          <SmartContractCodeViewer smartContractCode={generateSC.smartContract} />
+          <SmartContractCodeViewer smartContractCode={finalSmartContractCode} />
         </>
       ) : (
         <></>
@@ -78,3 +83,4 @@ export default function HomePage() {
     </div>
   );
 }
+

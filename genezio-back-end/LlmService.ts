@@ -172,9 +172,11 @@ export class LlmService {
 								type: 'string',
 								enum: ['High', 'Medium', 'Low'],
 							},
+							title: { type: 'string' },
 							description: { type: 'string' },
+
 						},
-						required: ['severity', 'description'],
+						required: ['severity', 'title', 'description'],
 					},
 				},
 			},
@@ -184,7 +186,7 @@ export class LlmService {
 		const prompt = `Generate a smart contract auditing report in JSON format according to this schema ${JSON.stringify(
 			auditSchema
 		)} given the following code: \n ${code}`;
-		const systemMsg = `Your task is to analyze and assess smart contracts for auditing purposes.`;
+		const systemMsg = `Your task is to analyze and assess smart contracts for auditing purposes by identifying the severity of the vulnerabilities, summarize them in a short title and description.`;
 		const auditorModel = 'ft:gpt-3.5-turbo-1106:personal::8Pw67TV2';
 
 		const auditResponse = await queryLLM(
