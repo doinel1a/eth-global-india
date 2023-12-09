@@ -12,6 +12,7 @@ dotenv.config();
 export type BuildResponseWithCode = {
 	success: boolean;
 	message: string;
+	artifact: any; // Hardhat Artifact
 	code: string;
 };
 

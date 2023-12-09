@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { BrowserProvider, ContractFactory } from 'ethers';
+
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import IAuditResponse from '@/interfaces/audit-response';
@@ -55,6 +57,7 @@ export default function SmartContractCustomisationSection({
   const setCompileSC = useSCIterStore((store) => store.setCompileSC);
   const setFixAndCompileSC = useSCIterStore((store) => store.setFixAndCompileSC);
   const setAuditSC = useSCIterStore((store) => store.setAuditSC);
+  const setDeploySC = useSCIterStore((store) => store.setDeploySC);
   const resetSCIterState = useSCIterStore((store) => store.reset);
 
   const { toast } = useToast();
@@ -111,10 +114,14 @@ export default function SmartContractCustomisationSection({
   }
 
   async function compileSmartContract() {
-    console.log('COMPILING SC');
-
     try {
-      setCompileSC({ isLoading: true, isSuccess: false, isError: false, compilationOutput: '' });
+      setCompileSC({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+        compilationOutput: '',
+        artifact: {}
+      });
 
       const { generateSC } = useSCIterStore.getState();
 
@@ -138,14 +145,16 @@ export default function SmartContractCustomisationSection({
             isLoading: false,
             isSuccess: true,
             isError: false,
-            compilationOutput: ''
+            compilationOutput: '',
+            artifact: response.artifact
           });
         } else {
           setCompileSC({
             isLoading: false,
             isSuccess: false,
             isError: true,
-            compilationOutput: response.message
+            compilationOutput: response.message,
+            artifact: response.artifact
           });
         }
       }
@@ -155,7 +164,8 @@ export default function SmartContractCustomisationSection({
           isLoading: false,
           isSuccess: false,
           isError: true,
-          compilationOutput: error.message
+          compilationOutput: error.message,
+          artifact: {}
         });
       }
     }
@@ -172,7 +182,13 @@ export default function SmartContractCustomisationSection({
         description: `Relax, our AI friend is taking care of it! Remaining Attempts: ${maxTries}`
       });
 
-      setCompileSC({ isLoading: true, isSuccess: false, isError: false, compilationOutput: '' });
+      setCompileSC({
+        isLoading: true,
+        isSuccess: false,
+        isError: false,
+        compilationOutput: '',
+        artifact: {}
+      });
       const newCode = await LlmService.callBuildResolverLLM(code, errorMsg);
       const buildResponse = await LlmService.buildCode(
         mapChainToCompileEndpoint(selectedChain),
@@ -186,12 +202,14 @@ export default function SmartContractCustomisationSection({
           isSuccess: true,
           isError: false,
           fixedSmartContract: newCode,
+          artifact: buildResponse.artifact,
           compilationOutput: buildResponse.message
         });
         setCompileSC({
           isLoading: false,
           isSuccess: true,
           isError: false,
+          artifact: buildResponse.artifact,
           compilationOutput: buildResponse.message
         });
       } else if (!buildResponse.success && maxTries == 0) {
@@ -206,12 +224,14 @@ export default function SmartContractCustomisationSection({
           isSuccess: false,
           isError: true,
           fixedSmartContract: newCode,
+          artifact: {},
           compilationOutput: buildResponse.message
         });
         setCompileSC({
           isLoading: false,
           isSuccess: false,
           isError: true,
+          artifact: {},
           compilationOutput: buildResponse.message
         });
       } else {
@@ -224,12 +244,14 @@ export default function SmartContractCustomisationSection({
           isSuccess: false,
           isError: true,
           fixedSmartContract: '',
-          compilationOutput: error.message
+          compilationOutput: error.message,
+          artifact: {}
         });
         setCompileSC({
           isLoading: false,
           isSuccess: false,
           isError: true,
+          artifact: {},
           compilationOutput: error.message
         });
       }
@@ -300,6 +322,42 @@ export default function SmartContractCustomisationSection({
     }
   }
 
+  async function deployContract() {
+    try {
+      console.log('DEPLOYING SUCA');
+      if (!window.ethereum) throw new Error('No ethereum provider found');
+      const { compileSC } = useSCIterStore.getState();
+      console.log('ARTIFACT', compileSC.artifact);
+      setDeploySC({ isLoading: true, isSuccess: false, isError: false, deploymentAddress: '' });
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      console.log('SIGNER', signer.address);
+      const contractFactory = new ContractFactory(
+        compileSC.artifact.abi,
+        compileSC.artifact.bytecode,
+        signer
+      );
+      console.log('CONTRACT FACTORY', contractFactory);
+
+      const deployedContract = await contractFactory.deploy(/** args */);
+      console.log('DEPLOYED CONTRACT', deployedContract);
+      const deploymentAddress = await deployedContract.getAddress();
+      await deployedContract.waitForDeployment();
+      setDeploySC({
+        isLoading: false,
+        isSuccess: true,
+        isError: false,
+        deploymentAddress: deploymentAddress
+      });
+      console.log('DEPLOY TX MINED SASATI LA PIDARI', deploymentAddress);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log('ERROR', error);
+        setDeploySC({ isLoading: false, isSuccess: false, isError: true, deploymentAddress: '' });
+      }
+    }
+  }
+
   return (
     <SectionContainer className='flex flex-col items-start justify-between gap-y-10 px-10 py-12 backdrop-blur-md'>
       <SmartContractTemplates scTemplates={scTemplates} />
@@ -315,6 +373,8 @@ export default function SmartContractCustomisationSection({
             ? 'Generating Smart Contract'
             : 'Generate Smart Contract'}
         </Button>
+
+        <Button onClick={deployContract}>Deploy the Motherfucker</Button>
 
         <GenerationStepsState />
       </div>
