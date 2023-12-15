@@ -14,6 +14,7 @@ import useSelectedChainStore from '@/store/selected-chain';
 import Image from '../image';
 import { Skeleton } from '../ui/skeleton';
 import SectionContainer from './container';
+import { Button } from '../ui/button';
 
 interface IChainSelectorSection {
   isChainsDataLoading: boolean;
@@ -31,25 +32,30 @@ export default function ChainSelectorSection({
 
   return (
     <SectionContainer
-      className='flex items-center justify-between px-10 py-12 backdrop-blur-md'
+      className='flex flex-col items-start justify-between lg:px-10 lg:py-12 md:px-10 md:py-12 p-5 backdrop-blur-md sm:flex-col md:flex-row md:items-center mb-7 sm:mb-9'
       style={{
-        background: `url(${stepBackground}) no-repeat`
+        background: `url(${stepBackground}) no-repeat`,
+        backgroundSize: "contain"
       }}
     >
-      <div className='flex flex-col gap-y-2.5'>
+      <div className='flex flex-col'>
+        <Button className=' hover:bg-transparent bg-transparent w-fit p-0 h-auto text-[#67696b] text-[16px] mb-1 font-normal'>
+          <img src="/img/arrow-left.svg" alt="" className='h-18 m-w-18 mr-2' />
+          Back
+        </Button>
         {isChainsDataLoading ? (
           <Skeleton className='h-10 w-96' />
         ) : (
-          <h2 className='text-4xl font-semibold'>{selectedChain} AI Builder</h2>
+          <h2 className='md:text-4xl text-[26px] font-semibold mb-2'>{selectedChain} AI Builder</h2>
         )}
         {isChainsDataLoading ? (
           <Skeleton className='h-7 w-96' />
         ) : (
-          <h3 className='text-lg'>Generate your custom DeFi application for {selectedChain}</h3>
+          <h3 className='sm:text-lg  text-base text-[#67696b] font-medium'>Generate your custom DeFi application for {selectedChain}</h3>
         )}
       </div>
 
-      <div className='flex items-center gap-x-2.5'>
+      <div className='flex items-center gap-x-2.5 mt-4 md:mt-0 flex-col sm:flex-row'>
         {isChainsDataLoading ? (
           <div className='flex items-center gap-x-2.5'>
             <Skeleton className='h-7 w-40' />
@@ -59,7 +65,7 @@ export default function ChainSelectorSection({
           <>
             <p className='text-lg'>Select target chain</p>
             <Select onValueChange={(value) => setSelectedChain(value)} defaultValue={selectedChain}>
-              <SelectTrigger className='w-40'>
+              <SelectTrigger className='w-40 bg-[#151616] border-[#212b2d]'>
                 <SelectValue
                   placeholder={
                     <div className='flex items-center gap-x-2.5'>

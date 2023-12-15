@@ -24,10 +24,10 @@ export default function SmartContractDescription() {
   const scTemplate = useSCCustomisationsStore((store) => store.scCustomisations.template);
 
   return (
-    <div className='flex w-full flex-col gap-y-5'>
-      <div>
-        <h2 className='mb-2 text-3xl font-semibold'>Describe Customisation</h2>
-        <h3 className='text-lg'>Choose customization to add into your {selectedChain} project</h3>
+    <div className='flex w-full flex-col'>
+      <div className='mt-9 sm:mt-12  sm:mb-9 mb-6'>
+        <h2 className='text-lg sm:text-2xl font-semibold'>Describe Customisation</h2>
+        <h3 className='text-base sm:text-lg font-medium text-[#69696b]'>Choose customization to add into your {selectedChain} project</h3>
       </div>
 
       <Textarea

@@ -24,7 +24,7 @@ export default function Anchor({
       rel={rel}
       target={target}
       className={cn(
-        'text-blue-600 transition-colors dark:text-blue-400 dark:hover:text-blue-500 dark:focus:text-blue-500',
+        'text-[#F5F7FB] transition-colors dark:text-[#F5F7FB] dark:hover:text-blue-500 dark:focus:text-blue-500',
         className
       )}
       {...properties}

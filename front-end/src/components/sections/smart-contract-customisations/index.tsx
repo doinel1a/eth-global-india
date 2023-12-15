@@ -324,13 +324,14 @@ export default function SmartContractCustomisationSection({
   }
 
   return (
-    <SectionContainer className='flex flex-col items-start justify-between gap-y-10 px-10 py-12 backdrop-blur-md'>
+    <SectionContainer className='flex flex-col  items-start justify-between px-10 py-12 backdrop-blur-md md:px-10 md:py-12 p-5'>
       <SmartContractTemplates scTemplates={scTemplates} />
       <SmartContractFeatures scFeatures={scFeatures} />
       <SmartContractDescription />
 
-      <div className='flex w-full items-center justify-between'>
+      <div className='flex w-full items-center justify-between flex-col md:flex-row sm:mt-7 mt-7'>
         <Button
+          className=' text-[16px] text-black bg-gradient-to-b from-[#F5F7FB] to-[#7590BA] hover:from-[#7e828aee] hover:to-[#6e97d7] sm:h-[auto] md:px-5 md:py-[18px] py-[16px] px-5 mb-5 md:mb-0'
           disabled={generateSC.isLoading || compileSC.isLoading || auditSC.isLoading}
           onClick={initSmartContractIter}
         >

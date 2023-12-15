@@ -19,26 +19,26 @@ export default function SmartContractTemplates({ scTemplates }: ISmartContractTe
   const setSCFeatures = useSCCustomisationsStore((store) => store.setSCFeatures);
 
   return (
-    <div className='flex flex-col gap-y-5'>
-      <div className='flex w-full items-start justify-between'>
-        <div className='flex flex-col'>
-          <h2 className='mb-2 text-3xl font-semibold'>Select Template</h2>
-          <h3 className='text-lg'>
+    <div className='flex flex-col w-[100%]'>
+      <div className='flex w-full items-start justify-between flex-col md:flex-row sm:mb-11 mb-6'>
+        <div className='flex flex-col '>
+          <h2 className='text-lg sm:text-2xl font-semibold'>Select Template</h2>
+          <h3 className='text-base sm:text-lg text-[#67696b] font-medium'>
             Choose modules to activate on your project, you can configure them later
           </h3>
         </div>
 
-        <Anchor href='https://docs.defibuilder.com/multiversex/xdefi'>Explore Docs</Anchor>
+        <Anchor href='https://docs.defibuilder.com/multiversex/xdefi' className='mt-3 ml-0 md:ml-1 md:mt-0 bg-[#151616] hover:bg-[#8aebfc33] border-[#212b2d] border rounded-xl w-[150px] h-[40px] sm:w-[190px] sm:h-[54px] flex items-center justify-center text-[#F5F7FB] font-medium text-sm sm:text-base'>Explore Docs</Anchor>
       </div>
 
-      <div className='flex gap-x-2.5'>
+      <div className='grid min-[420px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4'>
         {scTemplates.map((scTemplate, index) => (
           <Card
             key={`${scTemplate}-${index}`}
             tabIndex={0}
             role='button'
-            className={cn('w-1/6 cursor-pointer rounded-3xl border-2', {
-              'border-blue-500': selectedSCTemplate === scTemplate
+            className={cn(' cursor-pointer rounded-3xl border-2 border-[#131c1d]  ', {
+              'border-[#8AEBFC] ': selectedSCTemplate === scTemplate
             })}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -51,10 +51,12 @@ export default function SmartContractTemplates({ scTemplates }: ISmartContractTe
               setSCFeatures([]);
             }}
           >
-            <CardHeader className='text-center'>
+            <CardHeader className='text-center p-4'>
               <CardTitle className='flex flex-col items-center gap-y-2.5 text-xl'>
                 <TemplateIcon />
-                {scTemplate}
+                <span className='text-[#F5F7FB] font-medium text-[18px]'>
+                  {scTemplate}
+                </span>
               </CardTitle>
               <CardDescription>
                 Generate a {selectedChain} custom {scTemplate}

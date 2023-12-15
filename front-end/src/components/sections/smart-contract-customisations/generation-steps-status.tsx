@@ -77,30 +77,30 @@ function Step({ number, step, isLoading, isSuccess, isError, isStepConnected }: 
     <div className='flex flex-col items-center justify-center gap-y-1.5'>
       <div
         className={cn(
-          'relative flex h-7 w-7 items-center justify-center rounded-full bg-primary p-1 text-primary-foreground',
+          'relative flex h-7 w-7 items-center justify-center rounded-full bg-primary p-1 text-primary-foreground bg-[#0071E3]',
           { 'bg-blue-500 text-[#fafafa]': isSuccess, 'bg-red-500 text-[#fafafa]': isError }
         )}
       >
         {isLoading ? (
-          <Loader2 className='h-7 w-7 animate-spin text-blue-500' />
+          <Loader2 className='h-7 w-7 animate-spin ' />
         ) : isSuccess ? (
           <Check className='h-5 w-5' />
         ) : isError ? (
           <X className='h-5 w-5' />
         ) : (
-          <span>{number}</span>
+          <span className='text-[#fff]'>{number}</span>
         )}
 
         {isStepConnected && (
           <span
-            className={cn('absolute left-0 -z-[1] h-1 w-24 bg-primary text-primary-foreground', {
+            className={cn('absolute left-[7px] -z-[1] h-1 w-24 bg-primary text-primary-foreground bg-[#0071E3]', {
               'bg-blue-500': isSuccess,
               'bg-red-500': isError
             })}
           />
         )}
       </div>
-      <span className='text-sm'>{step}</span>
+      <span className='sm:text-[16px] text-[12px] text-[#444444] font-medium'>{step}</span>
     </div>
   );
 }

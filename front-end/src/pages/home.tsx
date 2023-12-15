@@ -65,7 +65,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className='flex w-full max-w-[1200px] flex-col gap-y-6'>
+    <div className='flex w-full max-w-[1200px] flex-col'>
       <ChainSelectorSection
         isChainsDataLoading={chainsDataState.isLoading}
         chainsData={chainsDataState.chainsData}

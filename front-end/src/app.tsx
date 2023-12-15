@@ -34,7 +34,7 @@ function App() {
           <Navbar />
 
           <main
-            className='flex h-full w-full justify-center pb-20 pt-40'
+            className='flex h-full w-full justify-center pb-20 pt-40 pl-1 pr-1'
             style={{
               background: `url(${mainBG}) no-repeat center top`
             }}

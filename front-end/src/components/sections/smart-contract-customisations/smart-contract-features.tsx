@@ -24,20 +24,21 @@ export default function SmartContractFeatures({ scFeatures }: ISmartContractFeat
   const setSCFeatures = useSCCustomisationsStore((store) => store.setSCFeatures);
 
   return (
-    <div className='flex flex-col gap-y-5'>
-      <div>
-        <h2 className='mb-2 text-3xl font-semibold'>Features Request</h2>
-        <h3 className='text-lg'>Choose features to activate on your {selectedChain} project</h3>
+    <div className='flex flex-col'>
+      <div className='sm:mt-9 mt-7 sm:mb-7 mb-5'>
+        <h2 className='text-lg sm:text-2xl font-semibold'>Features Request</h2>
+        <h3 className='text-base sm:text-lg text-[#69696b]'>Choose features to activate on your {selectedChain} project</h3>
       </div>
 
-      <div className='flex gap-x-5'>
+      <div className='gap-x-5 block'>
         {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
         {/* @ts-ignore */}
         {scFeatures[selectedSCTemplate]?.map((feature, index) => (
-          <div key={`${feature}-${index}`} className='flex items-center gap-x-1.5'>
+          <div key={`${feature}-${index}`} className='items-center gap-x-1.5 inline-block mr-4 relative top-[5px] ml-[20px]'>
             <Checkbox
               id={feature}
               onCheckedChange={(isChecked) => {
+                
                 if (isChecked) {
                   setSCFeatures([...selectedSCFeatures, feature]);
                 } else {
@@ -47,7 +48,7 @@ export default function SmartContractFeatures({ scFeatures }: ISmartContractFeat
                 }
               }}
             />
-            <label htmlFor={feature}>{feature}</label>
+            <label htmlFor={feature} className='ml-1'>{feature}</label>
           </div>
         ))}
       </div>
